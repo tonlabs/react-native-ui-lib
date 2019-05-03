@@ -169,7 +169,7 @@ export const extractAlignmentsValues = _.memoize(
   props => cacheResolver(props, ALIGNMENT_KEY_PATTERN),
 );
 
-export const extractFlexStyle = (props) => {
+export const extractFlexStyle = _.memoize((props) => {
   const STYLE_KEY_CONVERTERS = {
     flex: 'flex',
     flexG: 'flexGrow',
@@ -187,7 +187,7 @@ export const extractFlexStyle = (props) => {
 
     return {[flexKey]: flexValue};
   }
-}
+}, props => cacheResolver(props, FLEX_KEY_PATTERN));
 
 export const extractBorderRadiusValue = _.memoize(
   props => {
