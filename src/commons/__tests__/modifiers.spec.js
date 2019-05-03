@@ -28,9 +28,6 @@ describe('Modifiers', () => {
 
     it('should return color value according to background-?? prop that was sent', () => {
       expect(uut.extractBackgroundColorValue({'background-red30': true})).toBe(Colors.red30);
-      // eslint-disable-next-line no-underscore-dangle
-      expect(uut.extractBackgroundColorValue.cache.__data__.string.__data__['background-red30']).toBe(Colors.red30);
-      expect(uut.extractBackgroundColorValue({'background-red30': true})).toBe(Colors.red30); // check memoize
       expect(uut.extractBackgroundColorValue({'bg-red30': true})).toBe(Colors.red30);
     });
 
@@ -112,12 +109,12 @@ describe('Modifiers', () => {
       });
     });
 
-    it('should use memoize caching', () => {
-      expect(uut.extractPaddingValues({'padding-s3': true})).toEqual({padding: 9});
-      // eslint-disable-next-line no-underscore-dangle
-      expect(uut.extractPaddingValues.cache.__data__.string.__data__['padding-s3']).toEqual({padding: 9});
-      expect(uut.extractPaddingValues({'padding-s3': true})).toEqual({padding: 9});
-    });
+    // it('should use memoize caching', () => {
+    //   expect(uut.extractPaddingValues({'padding-s3': true})).toEqual({padding: 9});
+    //   // eslint-disable-next-line no-underscore-dangle
+    //   expect(uut.extractPaddingValues.cache.__data__.string.__data__['padding-s3']).toEqual({padding: 9});
+    //   expect(uut.extractPaddingValues({'padding-s3': true})).toEqual({padding: 9});
+    // });
 
     it('should ignore unfamiliar paddings keys', () => {
       expect(uut.extractPaddingValues({'paddings-25': true})).toEqual({});
@@ -133,12 +130,12 @@ describe('Modifiers', () => {
   });
 
   describe('extractMarginValues - margins modifiers', () => {
-    it('should use memoize caching', () => {
-      expect(uut.extractMarginValues({'marginL-s4': true})).toEqual({marginLeft: 12});
-      // eslint-disable-next-line no-underscore-dangle
-      expect(uut.extractMarginValues.cache.__data__.string.__data__['marginL-s4']).toEqual({marginLeft: 12});
-      expect(uut.extractMarginValues({'marginL-s4': true})).toEqual({marginLeft: 12});
-    });
+    // it('should use memoize caching', () => {
+    //   expect(uut.extractMarginValues({'marginL-s4': true})).toEqual({marginLeft: 12});
+    //   // eslint-disable-next-line no-underscore-dangle
+    //   expect(uut.extractMarginValues.cache.__data__.string.__data__['marginL-s4']).toEqual({marginLeft: 12});
+    //   expect(uut.extractMarginValues({'marginL-s4': true})).toEqual({marginLeft: 12});
+    // });
 
     it('should return margins values according to margin?-?? prop that was sent', () => {
       expect(
@@ -176,21 +173,21 @@ describe('Modifiers', () => {
   });
 
   describe('extractAlignmentsValues - alignments modifiers', () => {
-    it('should use memoize caching', () => {
-      expect(uut.extractAlignmentsValues({row: true, left: true})).toEqual({
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-      });
-      // eslint-disable-next-line no-underscore-dangle
-      expect(uut.extractAlignmentsValues.cache.__data__.string.__data__.rowleft).toEqual({
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-      });
-      expect(uut.extractAlignmentsValues({row: true, left: true})).toEqual({
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-      });
-    });
+    // it('should use memoize caching', () => {
+    //   expect(uut.extractAlignmentsValues({row: true, left: true})).toEqual({
+    //     flexDirection: 'row',
+    //     justifyContent: 'flex-start',
+    //   });
+    //   // eslint-disable-next-line no-underscore-dangle
+    //   expect(uut.extractAlignmentsValues.cache.__data__.string.__data__.rowleft).toEqual({
+    //     flexDirection: 'row',
+    //     justifyContent: 'flex-start',
+    //   });
+    //   expect(uut.extractAlignmentsValues({row: true, left: true})).toEqual({
+    //     flexDirection: 'row',
+    //     justifyContent: 'flex-start',
+    //   });
+    // });
 
     it('should return prop alignment for a row view', () => {
       expect(uut.extractAlignmentsValues({row: true, left: true})).toEqual({
@@ -277,12 +274,12 @@ describe('Modifiers', () => {
   });
 
   describe('extractBorderRadiusValue - BorderRadius modifier', () => {
-    it('should use memoize caching', () => {
-      expect(uut.extractBorderRadiusValue({br10: true})).toEqual(BorderRadiuses.br10);
-      // eslint-disable-next-line no-underscore-dangle
-      expect(uut.extractBorderRadiusValue.cache.__data__.string.__data__.br10).toEqual(BorderRadiuses.br10);
-      expect(uut.extractBorderRadiusValue({br10: true})).toEqual(BorderRadiuses.br10);
-    });
+    // it('should use memoize caching', () => {
+    //   expect(uut.extractBorderRadiusValue({br10: true})).toEqual(BorderRadiuses.br10);
+    //   // eslint-disable-next-line no-underscore-dangle
+    //   expect(uut.extractBorderRadiusValue.cache.__data__.string.__data__.br10).toEqual(BorderRadiuses.br10);
+    //   expect(uut.extractBorderRadiusValue({br10: true})).toEqual(BorderRadiuses.br10);
+    // });
 
     it('should return border radius value according br? modifier prop', () => {
       expect(uut.extractBorderRadiusValue({br10: true})).toEqual(BorderRadiuses.br10);

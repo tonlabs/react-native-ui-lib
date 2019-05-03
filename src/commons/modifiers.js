@@ -6,13 +6,14 @@ export const PADDING_KEY_PATTERN = new RegExp(`padding[LTRBHV]?-([0-9]*|${Spacin
 export const MARGIN_KEY_PATTERN = new RegExp(`margin[LTRBHV]?-([0-9]*|${Spacings.getKeysPattern()})`);
 export const ALIGNMENT_KEY_PATTERN = /(row|left|top|right|bottom|center|centerV|centerH|spread)/;
 
-function cacheResolver(props, pattern) {
-  return _.chain(props)
-    .keys()
-    .filter(key => pattern.test(key))
-    .join('')
-    .value();
-}
+// used for memoization, currently it seems bad for performance so it's disabled
+// function cacheResolver(props, pattern) {
+//   return _.chain(props)
+//     .keys()
+//     .filter(key => pattern.test(key))
+//     .join('')
+//     .value();
+// }
 
 export function extractColorValue(props) {
   const allColorsKeys = _.keys(Colors);
@@ -26,20 +27,16 @@ export function extractColorValue(props) {
 }
 
 // todo: refactor this and use BACKGROUND_KEY_PATTERN
-export const extractBackgroundColorValue = _.memoize(
-  props => {
-    let backgroundColor;
-    _.forEach(Colors, (value, key) => {
-      if (props[`background-${key}`] === true || props[`bg-${key}`] === true) {
-        backgroundColor = value;
-      }
-    });
+export const extractBackgroundColorValue = props => {
+  let backgroundColor;
+  _.forEach(Colors, (value, key) => {
+    if (props[`background-${key}`] === true || props[`bg-${key}`] === true) {
+      backgroundColor = value;
+    }
+  });
 
-    return backgroundColor;
-  },
-  // cache resolver
-  props => cacheResolver(props, Colors.getBackgroundKeysPattern()),
-);
+  return backgroundColor;
+};
 
 export function extractTypographyValue(props) {
   const typographyPropsKeys = _.chain(props)
@@ -56,120 +53,108 @@ export function extractTypographyValue(props) {
   return typography;
 }
 
-export const extractPaddingValues = _.memoize(
-  props => {
-    const PADDING_VARIATIONS = {
-      padding: 'padding',
-      paddingL: 'paddingLeft',
-      paddingT: 'paddingTop',
-      paddingR: 'paddingRight',
-      paddingB: 'paddingBottom',
-      paddingH: 'paddingHorizontal',
-      paddingV: 'paddingVertical',
-    };
-    const paddings = {};
-    const paddingPropsKeys = _.chain(props)
-      .keys()
-      .filter(key => PADDING_KEY_PATTERN.test(key))
-      .value();
+export const extractPaddingValues = props => {
+  const PADDING_VARIATIONS = {
+    padding: 'padding',
+    paddingL: 'paddingLeft',
+    paddingT: 'paddingTop',
+    paddingR: 'paddingRight',
+    paddingB: 'paddingBottom',
+    paddingH: 'paddingHorizontal',
+    paddingV: 'paddingVertical',
+  };
+  const paddings = {};
+  const paddingPropsKeys = _.chain(props)
+    .keys()
+    .filter(key => PADDING_KEY_PATTERN.test(key))
+    .value();
 
-    _.forEach(paddingPropsKeys, key => {
-      if (props[key] === true) {
-        const [paddingKey, paddingValue] = key.split('-');
-        const paddingVariation = PADDING_VARIATIONS[paddingKey];
-        if (!isNaN(paddingValue)) {
-          paddings[paddingVariation] = Number(paddingValue);
-        } else if (Spacings.getKeysPattern().test(paddingValue)) {
-          paddings[paddingVariation] = Spacings[paddingValue];
+  _.forEach(paddingPropsKeys, key => {
+    if (props[key] === true) {
+      const [paddingKey, paddingValue] = key.split('-');
+      const paddingVariation = PADDING_VARIATIONS[paddingKey];
+      if (!isNaN(paddingValue)) {
+        paddings[paddingVariation] = Number(paddingValue);
+      } else if (Spacings.getKeysPattern().test(paddingValue)) {
+        paddings[paddingVariation] = Spacings[paddingValue];
+      }
+    }
+  });
+
+  return paddings;
+};
+
+export const extractMarginValues = props => {
+  const MARGIN_VARIATIONS = {
+    margin: 'margin',
+    marginL: 'marginLeft',
+    marginT: 'marginTop',
+    marginR: 'marginRight',
+    marginB: 'marginBottom',
+    marginH: 'marginHorizontal',
+    marginV: 'marginVertical',
+  };
+
+  const margins = {};
+  const marginPropsKeys = _.chain(props)
+    .keys()
+    .filter(key => MARGIN_KEY_PATTERN.test(key))
+    .value();
+
+  _.forEach(marginPropsKeys, key => {
+    if (props[key] === true) {
+      const [marginKey, marginValue] = key.split('-');
+      const paddingVariation = MARGIN_VARIATIONS[marginKey];
+      if (!isNaN(marginValue)) {
+        margins[paddingVariation] = Number(marginValue);
+      } else if (Spacings.getKeysPattern().test(marginValue)) {
+        margins[paddingVariation] = Spacings[marginValue];
+      }
+    }
+  });
+
+  return margins;
+};
+
+export const extractAlignmentsValues = props => {
+  const {row, center} = props;
+  const alignments = {};
+
+  const alignmentRules = {};
+  if (row) {
+    alignments.flexDirection = 'row';
+    alignmentRules.justifyContent = ['left', 'right', 'centerH', 'spread'];
+    alignmentRules.alignItems = ['top', 'bottom', 'centerV'];
+  } else {
+    alignmentRules.justifyContent = ['top', 'bottom', 'centerV', 'spread'];
+    alignmentRules.alignItems = ['left', 'right', 'centerH'];
+  }
+
+  _.forEach(alignmentRules, (positions, attribute) => {
+    _.forEach(positions, position => {
+      if (props[position]) {
+        if (_.includes(['top', 'left'], position)) {
+          alignments[attribute] = 'flex-start';
+        } else if (_.includes(['bottom', 'right'], position)) {
+          alignments[attribute] = 'flex-end';
+        } else if (_.includes(['centerH', 'centerV'], position)) {
+          alignments[attribute] = 'center';
+        } else if (position === 'spread') {
+          alignments[attribute] = 'space-between';
         }
       }
     });
+  });
 
-    return paddings;
-  },
-  // cache resolver
-  props => cacheResolver(props, PADDING_KEY_PATTERN),
-);
+  if (center) {
+    alignments.justifyContent = 'center';
+    alignments.alignItems = 'center';
+  }
 
-export const extractMarginValues = _.memoize(
-  props => {
-    const MARGIN_VARIATIONS = {
-      margin: 'margin',
-      marginL: 'marginLeft',
-      marginT: 'marginTop',
-      marginR: 'marginRight',
-      marginB: 'marginBottom',
-      marginH: 'marginHorizontal',
-      marginV: 'marginVertical',
-    };
+  return alignments;
+};
 
-    const margins = {};
-    const marginPropsKeys = _.chain(props)
-      .keys()
-      .filter(key => MARGIN_KEY_PATTERN.test(key))
-      .value();
-
-    _.forEach(marginPropsKeys, key => {
-      if (props[key] === true) {
-        const [marginKey, marginValue] = key.split('-');
-        const paddingVariation = MARGIN_VARIATIONS[marginKey];
-        if (!isNaN(marginValue)) {
-          margins[paddingVariation] = Number(marginValue);
-        } else if (Spacings.getKeysPattern().test(marginValue)) {
-          margins[paddingVariation] = Spacings[marginValue];
-        }
-      }
-    });
-
-    return margins;
-  },
-  // cache resolver
-  props => cacheResolver(props, MARGIN_KEY_PATTERN),
-);
-
-export const extractAlignmentsValues = _.memoize(
-  props => {
-    const {row, center} = props;
-    const alignments = {};
-
-    const alignmentRules = {};
-    if (row) {
-      alignments.flexDirection = 'row';
-      alignmentRules.justifyContent = ['left', 'right', 'centerH', 'spread'];
-      alignmentRules.alignItems = ['top', 'bottom', 'centerV'];
-    } else {
-      alignmentRules.justifyContent = ['top', 'bottom', 'centerV', 'spread'];
-      alignmentRules.alignItems = ['left', 'right', 'centerH'];
-    }
-
-    _.forEach(alignmentRules, (positions, attribute) => {
-      _.forEach(positions, position => {
-        if (props[position]) {
-          if (_.includes(['top', 'left'], position)) {
-            alignments[attribute] = 'flex-start';
-          } else if (_.includes(['bottom', 'right'], position)) {
-            alignments[attribute] = 'flex-end';
-          } else if (_.includes(['centerH', 'centerV'], position)) {
-            alignments[attribute] = 'center';
-          } else if (position === 'spread') {
-            alignments[attribute] = 'space-between';
-          }
-        }
-      });
-    });
-
-    if (center) {
-      alignments.justifyContent = 'center';
-      alignments.alignItems = 'center';
-    }
-
-    return alignments;
-  },
-  // cache resolver
-  props => cacheResolver(props, ALIGNMENT_KEY_PATTERN),
-);
-
-export const extractFlexStyle = _.memoize((props) => {
+export const extractFlexStyle = props => {
   const STYLE_KEY_CONVERTERS = {
     flex: 'flex',
     flexG: 'flexGrow',
@@ -187,25 +172,22 @@ export const extractFlexStyle = _.memoize((props) => {
 
     return {[flexKey]: flexValue};
   }
-}, props => cacheResolver(props, FLEX_KEY_PATTERN));
+};
 
-export const extractBorderRadiusValue = _.memoize(
-  props => {
-    const borderRadiusPropsKeys = _.chain(props)
-      .keys()
-      .filter(key => BorderRadiuses.getKeysPattern().test(key))
-      .value();
-    let borderRadius;
-    _.forEach(borderRadiusPropsKeys, key => {
-      if (props[key] === true) {
-        borderRadius = BorderRadiuses[key];
-      }
-    });
+export const extractBorderRadiusValue = props => {
+  const borderRadiusPropsKeys = _.chain(props)
+    .keys()
+    .filter(key => BorderRadiuses.getKeysPattern().test(key))
+    .value();
+  let borderRadius;
+  _.forEach(borderRadiusPropsKeys, key => {
+    if (props[key] === true) {
+      borderRadius = BorderRadiuses[key];
+    }
+  });
 
-    return borderRadius;
-  },
-  props => cacheResolver(props, BorderRadiuses.getKeysPattern()),
-);
+  return borderRadius;
+};
 
 export function extractModifierProps(props) {
   const patterns = [
