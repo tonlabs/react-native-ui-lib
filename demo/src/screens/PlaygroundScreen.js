@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, TouchableOpacity} from 'react-native';
+import {StyleSheet, TouchableOpacity, Text as RNText, View as RNView} from 'react-native';
 import {Colors, View, Text, Button} from 'react-native-ui-lib'; //eslint-disable-line
 import _ from 'lodash';
 
@@ -16,18 +16,22 @@ export default class PlaygroundScreen extends Component {
 
   render() {
     return (
-      <View flex bg-dark80 bg-red50 padding-20 style={styles.container}>
+      <RNView flex bg-dark80 bg-red50 padding-20 style={styles.container} center>
         {/* <Text red20 marginL-120 uppercase>asdasd</Text> */}
 
         {this.state.show && <Tester />}
+
+        <View bg-blue40 br20 padding-20 margin-20>
+          <Text>SHALOM</Text>
+        </View>
 
         <TouchableOpacity
           style={{position: 'absolute', top: 10, right: 10}}
           onPress={() => this.setState({show: !this.state.show})}
         >
-          <Text>PRESS ME</Text>
+          <RNText>PRESS ME</RNText>
         </TouchableOpacity>
-      </View>
+      </RNView>
     );
   }
 }
@@ -52,11 +56,7 @@ class Tester extends Component {
 
   render() {
     return _.times(500, index => {
-      return (
-        // <View key={index}>
-        <Text>text</Text>
-        // </View>
-      );
+      return <View bg-red50 br20 key={index} />;
     });
   }
 }
