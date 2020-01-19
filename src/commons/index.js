@@ -21,5 +21,8 @@ module.exports = {
   },
   get forwardRef() {
     return require('./forwardRef').default;
+  },
+  get Modifiers() {
+    return require('./modifiers');
   }
 };

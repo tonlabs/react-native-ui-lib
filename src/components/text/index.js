@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {PureComponent} from 'react';
 import {Text as RNText, StyleSheet} from 'react-native';
-import {PureBaseComponent} from '../../commons';
+import {asBaseComponent, forwardRef, Modifiers} from '../../commons';
 
 /**
  * @description: A wrapper for Text component with extra functionality like modifiers support
@@ -9,7 +9,7 @@ import {PureBaseComponent} from '../../commons';
  * @extendslink: https://facebook.github.io/react-native/docs/text.html
  * @modifiers: margins, color, typography
  */
-export default class Text extends PureBaseComponent {
+class Text extends PureComponent {
   static displayName = 'Text';
   static propTypes = {
     ...RNText.propTypes,
@@ -32,49 +32,44 @@ export default class Text extends PureBaseComponent {
   //   color: Colors.dark10,
   // }
 
-  generateStyles() {
-    this.styles = createStyles(this.props);
-  }
+  // generateStyles() {
+  //   this.styles = createStyles(this.props);
+  // }
 
-  setNativeProps(nativeProps) {
-    this._root.setNativeProps(nativeProps); // eslint-disable-line
-  }
+  // setNativeProps(nativeProps) {
+  //   this._root.setNativeProps(nativeProps); // eslint-disable-line
+  // }
 
   render() {
-    const color = this.getThemeProps().color || this.extractColorValue();
-    const typography = this.extractTypographyValue();
-    const {style, center, uppercase, ...others} = this.getThemeProps();
-    const {margins} = this.state;
+    const color = this.props.color || Modifiers.extractColorValue(this.props);
+    const typography = Modifiers.extractTypographyValue(this.props);
+    const {style, center, uppercase, modifiers, forwardedRef, ...others} = this.props;
+    const {margins} = modifiers;
     const textStyle = [
-      this.styles.container,
+      styles.container,
       typography,
       color && {color},
       margins,
-      center && {textAlign: 'center'},
+      center && styles.centered,
+      uppercase && styles.uppercase,
       style
     ];
-    const children = uppercase ? this.transformToUppercase(this.props.children) : this.props.children;
 
-    return (
-      <RNText {...others} style={textStyle} ref={this.setRef}>
-        {children}
-      </RNText>
-    );
-  }
-
-  transformToUppercase(items) {
-    if (typeof items === 'string') {
-      return items.toUpperCase();
-    }
-    return items;
+    return <RNText {...others} style={textStyle} ref={forwardedRef} /* _ref={this.setRef} *//>;
   }
 }
 
-function createStyles() {
-  return StyleSheet.create({
-    container: {
-      backgroundColor: 'transparent',
-      textAlign: 'left'
-    }
-  });
-}
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'transparent',
+    textAlign: 'left'
+  },
+  centered: {
+    textAlign: 'center'
+  },
+  uppercase: {
+    textTransform: 'uppercase'
+  }
+});
+
+export default asBaseComponent(forwardRef(Text));
