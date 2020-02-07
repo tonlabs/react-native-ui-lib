@@ -14,10 +14,10 @@ import {
   Button,
   Carousel,
   TextField,
-  Image
+  Image,
+  Incubator
 } from 'react-native-ui-lib'; //eslint-disable-line
 import {navigationData} from './MenuStructure';
-
 
 const settingsIcon = require('../assets/icons/settings.png');
 const chevronIcon = require('../assets/icons/chevronRight.png');
@@ -302,43 +302,65 @@ export default class MainScreen extends Component {
     );
   }
 
-  renderCarousel(data) {
+  renderPage(section, key) {
     const {pageStyle} = this.props;
-    const dividerTransforms = [-10, -55, -20];
-    const dividerWidths = ['60%', '75%', '90%'];
-    const keys = _.keys(data);
-
     return (
-      <Carousel
-        ref={carousel => (this.carousel = carousel)}
-        containerStyle={{flex: 1}}
-        onChangePage={this.onChangePage} 
-      >
-        {_.map(data, (section, key) => {
-          return (
-            <View key={key} style={[styles.page, pageStyle]}>
-              {this.renderSectionTitle(section.title)}
-              <View
-                style={[
-                  styles.pageTitleExtraDivider,
-                  {width: dividerWidths[_.indexOf(keys, key) % dividerWidths.length]},
-                  {transform: [{translateX: dividerTransforms[_.indexOf(keys, key) % dividerTransforms.length]}]}
-                ]}
-              />
-              <View flex>
-                <FlatList
-                  showsVerticalScrollIndicator={false}
-                  data={section.screens}
-                  keyExtractor={item => item.screen ? item.title : `header_${item.title}`}
-                  renderItem={this.renderItem}
-                />
-              </View>
-            </View>
-          );
-        })}
-      </Carousel>
+      <Incubator.TabController.TabPage>
+        <View paddingT-20 key={key} style={[styles.page, pageStyle]}>
+          {this.renderSectionTitle(section.title)}
+          <View
+            style={styles.pageTitleExtraDivider}
+          />
+          <View flex>
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={section.screens}
+              keyExtractor={item => (item.screen ? item.title : `header_${item.title}`)}
+              renderItem={this.renderItem}
+            />
+          </View>
+        </View>
+      </Incubator.TabController.TabPage>
     );
   }
+
+  // renderCarousel(data) {
+  //   const {pageStyle} = this.props;
+  //   const dividerTransforms = [-10, -55, -20];
+  //   const dividerWidths = ['60%', '75%', '90%'];
+  //   const keys = _.keys(data);
+
+  //   return (
+  //     <Carousel
+  //       ref={carousel => (this.carousel = carousel)}
+  //       containerStyle={{flex: 1}}
+  //       onChangePage={this.onChangePage}
+  //     >
+  //       {_.map(data, (section, key) => {
+  //         return (
+  //           <View key={key} style={[styles.page, pageStyle]}>
+  //             {this.renderSectionTitle(section.title)}
+  //             <View
+  //               style={[
+  //                 styles.pageTitleExtraDivider,
+  //                 {width: dividerWidths[_.indexOf(keys, key) % dividerWidths.length]},
+  //                 {transform: [{translateX: dividerTransforms[_.indexOf(keys, key) % dividerTransforms.length]}]}
+  //               ]}
+  //             />
+  //             <View flex>
+  //               <FlatList
+  //                 showsVerticalScrollIndicator={false}
+  //                 data={section.screens}
+  //                 keyExtractor={item => (item.screen ? item.title : `header_${item.title}`)}
+  //                 renderItem={this.renderItem}
+  //               />
+  //             </View>
+  //           </View>
+  //         );
+  //       })}
+  //     </Carousel>
+  //   );
+  // }
 
   renderSearchResults(data) {
     const flatData = _.flatMap(data);
@@ -361,6 +383,8 @@ export default class MainScreen extends Component {
     const showCarousel = !filterText;
     const data = this.getMenuData();
 
+    const sections = Object.keys(data).map(section => ({label: section}));
+
     return (
       <View testID="demo_main_screen" flex bg-dark80 style={containerStyle}>
         {this.renderHeader()}
@@ -373,8 +397,15 @@ export default class MainScreen extends Component {
         )}
         {showCarousel && (
           <View flex useSafeArea>
-            {this.renderBreadcrumbs()}
-            {this.renderCarousel(data)}
+            <Incubator.TabController asCarousel>
+              <Incubator.TabController.TabBar items={sections}/>
+              <Incubator.TabController.PageCarousel>
+                {_.map(data, this.renderPage)}
+              </Incubator.TabController.PageCarousel>
+
+              {/* {this.renderBreadcrumbs()} */}
+              {/* {this.renderCarousel(data)} */}
+            </Incubator.TabController>
           </View>
         )}
         {showResults && this.renderSearchResults(filteredNavigationData)}
