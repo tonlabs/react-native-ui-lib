@@ -241,5 +241,6 @@ index.android.js
 index.ios.js
 # ignore the .ts files
 *.ts
+*.tsx
 # include the .d.ts files
 !*.d.ts
